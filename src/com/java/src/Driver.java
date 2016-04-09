@@ -12,7 +12,7 @@ import com.amazonaws.http.IdleConnectionReaper;
 import com.aws.SNSObject;
 import com.aws.SQSObject;
 
-import src.com.sa.WorkerPoolCreater;
+import com.sa.WorkerPoolCreater;
 
 public class Driver extends Thread {
 
