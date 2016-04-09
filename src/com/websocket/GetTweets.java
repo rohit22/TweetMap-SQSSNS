@@ -11,24 +11,34 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import com.aws.UploadTweets;
-import com.java.src.TwitterStreamConsumer;
+import com.java.src.Driver;
+import com.java.src.UploadToWebSockets;
 
 
 @ServerEndpoint("/getTweets")
-public class GetTweets2 {
+public class GetTweets {
 	/**
 	 * @OnOpen allows us to intercept the creation of a new session. The session
 	 *         class allows us to send data to the user. In the method onOpen,
 	 *         we'll let the user know that the handshake was successful.
 	 */
 	private static String queryWord;
-	
+	private static Driver d;
 	
 	
 	@OnOpen
 	public void onOpen(Session session) {
-		Logger.getLogger(GetTweets2.class.getName()).log(Level.INFO, "Session Started", "start");
-		TwitterStreamConsumer.setSession(session);
+		Logger.getLogger(GetTweets.class.getName()).log(Level.INFO, "Session Started", "start");
+		try {
+			d = new Driver();
+			d.start();
+			Thread.sleep(1000);
+			d.addSession(session);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**
@@ -46,7 +56,7 @@ public class GetTweets2 {
 			queryWord = null;
 		}
 		if (queryWord != null) {
-			Logger.getLogger(GetTweets2.class.getName()).log(Level.INFO, "Received Query " + message, "start");
+			Logger.getLogger(GetTweets.class.getName()).log(Level.INFO, "Received Query " + message, "start");
 			UploadTweets ut = new UploadTweets();
 			String results = "No Results In the database";
 			try {
@@ -63,7 +73,8 @@ public class GetTweets2 {
 				e.printStackTrace();
 			}
 		}
-		TwitterStreamConsumer.setSessionQueryWords(session, queryWord);
+		
+		d.addSession(session, queryWord);
 	}
 
 	/**
@@ -75,7 +86,7 @@ public class GetTweets2 {
 	public void onClose(Session session) {
 		try {
 			// streamConsumer.join();
-			TwitterStreamConsumer.removeSession(session);
+			d.removeSession(session);
 			session.close();
 			// } catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -84,11 +95,13 @@ public class GetTweets2 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Logger.getLogger(GetTweets2.class.getName()).log(Level.INFO, "Session Ended", "start");
+		Logger.getLogger(GetTweets.class.getName()).log(Level.INFO, "Session Ended", "start");
 	}
 
 	@OnError
 	public void onError(Throwable t, Session s) {
-		TwitterStreamConsumer.removeSession(s);
+		d.removeSession(s);
+		d.stopDriver();
+		d.interrupt();
 	}
 }
