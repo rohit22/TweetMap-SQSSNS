@@ -15,6 +15,7 @@ public class JsonObjectES {
 		objFields.put("id_str", id_str);
 		objFields.put("text", text);
 		objFields.put("latlng", lat+", "+lng);
+		objFields.put("sentiment", null);
 		//objFields.put("lng", lng);
 		objFields.put("original", original);
 		obj.put("fields", objFields);
