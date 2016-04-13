@@ -8,6 +8,9 @@ The technologies used by us in this project are
 - Twitter streaming API
 - WebSockets
 - Tomcat 
+- Amazon SQS
+- Amazon SNS
+- Alchemy API
 
 **Data Sourcing:** Amazon streaming API needs keywords to track. We gave nearly 30 keywords based on the latest trends and interesting topics. We had to give a large set of words for tracking owing to the constraints we placed on the information of a tweet.
 
@@ -28,9 +31,15 @@ The technologies used by us in this project are
 
 - **com.java.src:** *TwitterStreamServer.java:* This class contains a main file and this can be used to run TwitterStreamConsumer standalone. This funcionality is primarily used to index twitter data offline. 
 
-- **com.utils:** Contains the utilities files for parsing and creating json objects at different points in the workflow.
+- **com.java.src:** *Driver.java:* The main class used to start different threads for processing. This class starts the twitter stream consumer and other threads for pushing and listening to different queues (SQS and SNS).
+
+- **com.java.src:** *UploadToWebSockets.java:* This class is used to push the tweets onto the websocket. This class receives messages from SNS which are then pushed onto websockets and also for batch uploading to CloudSearch.
+
+- **com.sa:** This packages contains the classes related to Alchemy API. This package contains a classes (*WorkerPoolCreater.java:*, *WorkerThread.java:*) used to listen to SQS queue and spin a new thread for identifying the sentiment using Alchemy API (*AlchemyAPI.java:*, *AlchemyAPI_Params.java:*)
 
 - **com.websocket:** *GetTweets2.java:* File that is the server side end point for the websocket. It contains the function mappings and necessary invocations.
+
+- **com.utils:** Contains the utilities files for parsing and creating json objects at different points in the workflow.
 
 - **WebContent:** *index.html:* The UI of our application. It interacts with GetTweets2.java to get relevant tweets for displaying. 
 
