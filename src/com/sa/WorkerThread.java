@@ -1,5 +1,8 @@
 package com.sa;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -16,9 +19,11 @@ public class WorkerThread implements Runnable {
 		this.command = s;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
-		System.out.println(Thread.currentThread().getName() + " Start. Command = " + command);
+		Logger.getLogger(WorkerThread.class.getName()).log(Level.INFO,
+				Thread.currentThread().getName() + " Started. Fetching sentiment...", "");
 		processCommand();
 		// Get sentiment and modify object
 		JSONParser p = new JSONParser();
@@ -35,17 +40,20 @@ public class WorkerThread implements Runnable {
 			String sentiment = AlchemyAPI.getSentiment(text);
 			objFields.put("sentiment", sentiment);
 			obj.put("fields", objFields);
+			Logger.getLogger(WorkerThread.class.getName()).log(Level.INFO, "Publishing to SNS -> " + obj.toString(),
+					"");
 			PublishRequest publishRequest = new PublishRequest(SNSObject.getTopicArn(), obj.toString());
 			PublishResult publishResult = SNSObject.getSnsClient().publish(publishRequest);
-			// print MessageId of message published to SNS topic
-			System.out.println("MessageId - " + publishResult.getMessageId());
-			System.out.println(Thread.currentThread().getName() + " End.");
+			Logger.getLogger(WorkerThread.class.getName()).log(Level.INFO,
+					"SNS Message Id -> " + publishResult.getMessageId(), "");
+			Logger.getLogger(WorkerThread.class.getName()).log(Level.INFO, Thread.currentThread().getName() + " Ended.",
+					"");
 		}
 	}
 
 	private void processCommand() {
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			System.out.println("Thread Interrupted");
 			// e.printStackTrace();

@@ -165,9 +165,12 @@ public class TwitterStreamConsumer implements Runnable {
 				}
 				JSONObject obj = parseTweet(line);
 				if (obj != null) {
-					System.out.println(obj);
+					Logger.getLogger(TwitterStreamConsumer.class.getName()).log(Level.INFO, "Published to SQS Queue -> " + obj,
+							"connection");
+					
 					// UploadToWebSockets.pushToSocket(obj);
 					sqs.sendMessage(new SendMessageRequest(SQSObject.getQueueURL(), obj.toJSONString()));
+					
 				}
 
 			}
@@ -216,7 +219,7 @@ public class TwitterStreamConsumer implements Runnable {
 				String text = map.get("text").toString();
 				String id = map.get("id").toString();
 				String id_str = map.get("id_str").toString();
-				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add");
+				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add",null);
 
 				// System.out.println(obj.toJSONString());
 			}

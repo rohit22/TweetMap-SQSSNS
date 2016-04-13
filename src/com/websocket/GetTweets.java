@@ -12,7 +12,6 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import com.aws.UploadTweets;
 import com.java.src.Driver;
-import com.java.src.UploadToWebSockets;
 
 
 @ServerEndpoint("/getTweets")

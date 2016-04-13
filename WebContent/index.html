@@ -31,6 +31,7 @@ html, body {
 
 	<!-- Script to utilise the WebSocket -->
 	<script type="text/javascript">
+		var map;
 		var coords = new Array();
 		var webSocket;
 		var messages = document.getElementById("messages");
@@ -96,16 +97,41 @@ html, body {
 				liveTweets = [];
 				for (i = 0; i < obj.length; i++) {
 					c = new google.maps.LatLng(obj[i].lat, obj[i].lng);
+					var image;
+					if (obj.sentiment=='positive')
+						image = "green-dot.png";
+					if (obj.sentiment=='negative')
+						image = "pink-dot.png";
+					if (obj.sentiment=='neutral')
+						image = "orange-dot.png";
+					var beachMarker = new google.maps.Marker({
+				          position: c,
+				          map: map,
+				          icon: image
+				        });
 					//console.log(c);
 					liveTweets.push(c);
 				}
 				//console.log(liveTweets);
-				heatmap.setData(liveTweets);
+				//heatmap.setData(liveTweets);
 			} else {
 				c = new google.maps.LatLng(obj.lat, obj.lng);
+				var image;
+				if (obj.sentiment=='positive')
+					image = "green-dot.png";
+				if (obj.sentiment=='negative')
+					image = "pink-dot.png";
+				if (obj.sentiment=='neutral')
+					image = "orange-dot.png";
+				var beachMarker = new google.maps.Marker({
+			          position: c,
+			          map: map,
+			          icon: image
+			        });
+
 				liveTweets.push(c);
 				// console.log(liveTweets);
-				heatmap.setData(liveTweets);
+				//heatmap.setData(liveTweets);
 			}
 			/* messages.innerHTML += "<br/>" + text + "Test"; */
 		}
@@ -128,7 +154,7 @@ html, body {
 				},
 			};
 
-			var map = new google.maps.Map(document.getElementById("map"),
+			map = new google.maps.Map(document.getElementById("map"),
 					myOptions);
 			heatmap = new google.maps.visualization.HeatmapLayer({
 				data : liveTweets,

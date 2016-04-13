@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.cloudsearchdomain.AmazonCloudSearchDomainClient;
 import com.amazonaws.services.cloudsearchdomain.model.Hit;
@@ -128,7 +127,7 @@ public class UploadTweets {
 					latlng = latlng.replaceAll(",", ", ");
 				}
 				JSONObject obj = JsonObjectResult.getObject(h.getId(), h.getFields().get("id_str").toString(),
-						h.getFields().get("text").toString(), latlng.split(", ")[0].trim(), latlng.split(", ")[1].trim());
+						h.getFields().get("text").toString(), latlng.split(", ")[0].trim(), latlng.split(", ")[1].trim(), h.getFields().get("sentiment").toString());
 				array.add(obj);
 			}
 		}

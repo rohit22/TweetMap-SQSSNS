@@ -24,7 +24,10 @@ public class AlchemyAPI {
 
 	public static String getSentiment(String text) {
 		try {
-			return getSentimentFromDocument(AlchemyAPI.TextGetTextSentiment(text));
+			Document doc = AlchemyAPI.TextGetTextSentiment(text);
+			if (doc != null) {
+				return getSentimentFromDocument(doc);
+			}
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -89,19 +92,25 @@ public class AlchemyAPI {
 			String statusStr = getNodeValue(factory, doc, "/results/status/text()");
 			if (null == statusStr || !statusStr.equals("OK")) {
 				String statusInfoStr = getNodeValue(factory, doc, "/results/statusInfo/text()");
-				if (null != statusInfoStr && statusInfoStr.length() > 0)
-					throw new IOException("Error making API call: " + statusInfoStr + '.');
-
-				throw new IOException("Error making API call: " + statusStr + '.');
+				if (null != statusInfoStr && statusInfoStr.length() > 0) {
+					System.out.println("Error making API call: " + statusInfoStr + '.');
+					// throw new IOException();
+				}
+				System.out.println("Error making API call: " + statusStr + '.');
+				// throw new IOException("Error making API call: " + statusStr +
+				// '.');
 			}
 		} else if (AlchemyAPI_Params.OUTPUT_RDF.equals(outputMode)) {
 			String statusStr = getNodeValue(factory, doc, "//RDF/Description/ResultStatus/text()");
 			if (null == statusStr || !statusStr.equals("OK")) {
 				String statusInfoStr = getNodeValue(factory, doc, "//RDF/Description/ResultStatus/text()");
-				if (null != statusInfoStr && statusInfoStr.length() > 0)
-					throw new IOException("Error making API call: " + statusInfoStr + '.');
-
-				throw new IOException("Error making API call: " + statusStr + '.');
+				if (null != statusInfoStr && statusInfoStr.length() > 0) {
+					System.out.println("Error making API call: " + statusInfoStr + '.');
+					// throw new IOException();
+				}
+				System.out.println("Error making API call: " + statusStr + '.');
+				// throw new IOException("Error making API call: " + statusStr +
+				// '.');
 			} else {
 				System.out.println("Here!");
 			}

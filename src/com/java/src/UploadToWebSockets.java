@@ -56,7 +56,7 @@ public class UploadToWebSockets implements Runnable {
 
 		// Subscribe to topic
 		subscribeReq = new SubscribeRequest().withTopicArn(SNSObject.getTopicArn()).withProtocol("http")
-				.withEndpoint("http://f630309b.ngrok.io");
+				.withEndpoint("http://168e3d32.ngrok.io");
 		SNSObject.getSnsClient().subscribe(subscribeReq);
 
 	}
@@ -93,7 +93,7 @@ public class UploadToWebSockets implements Runnable {
 	}
 
 	public void setSessionQueryWords(Session s, String q) {
-		Logger.getLogger(TwitterStreamConsumer.class.getName()).log(Level.INFO, "Set Query Words to " + q, "");
+		Logger.getLogger(UploadToWebSockets.class.getName()).log(Level.INFO, "Set Query Words to " + q, "");
 		sessionQueryWords.put(s, q);
 	}
 
@@ -106,25 +106,22 @@ public class UploadToWebSockets implements Runnable {
 			fw.flush();
 			fw.close();
 			ut.addDocumentFile(String.valueOf(chunk) + ".json");
-			Logger.getLogger(TwitterStreamConsumer.class.getName()).log(Level.INFO,
+			Logger.getLogger(UploadToWebSockets.class.getName()).log(Level.INFO,
 					"Uploaded File " + String.valueOf(chunk) + ".json", "upload");
-			// System.out.println("Uploaded File -> " + String.valueOf(chunk) +
-			// ".json");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// System.out.println(array.toJSONString());
 	}
 
+	@SuppressWarnings("unchecked")
 	private void pushToSocket(JSONObject obj) throws IOException {
 
 		if (obj != null) {
 			JSONObject objT = JsonObjectResult.convert(obj);
 			String text = objT.get("text").toString();
 			if (sessionQueryWords.isEmpty() && !onlyIndex) {
-				System.out.println(sessionQueryWords.size());
+				// System.out.println(sessionQueryWords.size());
 				return;
 			} else {
 				for (Session s : sessionQueryWords.keySet()) {
@@ -152,11 +149,6 @@ public class UploadToWebSockets implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		try {
-			// Get an HTTP Port
-			// int port = args.length == 1 ? Integer.parseInt(args[0]) : 8989;
-
-			System.out.println("Started");
-			// Create and start HTTP server
 
 			while (shouldRun) {
 
@@ -178,7 +170,9 @@ public class UploadToWebSockets implements Runnable {
 				// Check for a notification
 				String message = messageMap.get("Message");
 				if (message != null) {
-					System.out.println("Received message: " + message);
+					// System.out.println("Received message: " + message);
+					Logger.getLogger(UploadToWebSockets.class.getName()).log(Level.INFO,
+							"Received from SNS -> " + message, "");
 					JSONParser parser = new JSONParser();
 					pushToSocket((JSONObject) parser.parse(message));
 				}
@@ -206,6 +200,7 @@ public class UploadToWebSockets implements Runnable {
 
 			// Build a message map from the JSON encoded message
 			InputStream bytes = new ByteArrayInputStream(sb.toString().getBytes());
+			@SuppressWarnings("unchecked")
 			Map<String, String> messageMap = new ObjectMapper().readValue(bytes, Map.class);
 
 			// Enqueue message map for receive loop
@@ -215,6 +210,7 @@ public class UploadToWebSockets implements Runnable {
 			response.setContentType("text/html");
 			response.setStatus(HttpServletResponse.SC_OK);
 			((Request) request).setHandled(true);
+			scanner.close();
 		}
 	}
 

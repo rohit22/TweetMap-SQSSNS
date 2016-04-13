@@ -3,14 +3,11 @@ package com.java.src;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.websocket.Session;
-
-import org.apache.commons.lang3.SystemUtils;
-
 import com.amazonaws.http.IdleConnectionReaper;
-import com.aws.SNSObject;
-import com.aws.SQSObject;
 
 import com.sa.WorkerPoolCreater;
 
@@ -26,13 +23,6 @@ public class Driver extends Thread {
 		return hasStarted;
 	}
 
-	/*
-	 * public static void initializePipeline() { if (!hasStarted) { hasStarted =
-	 * true; consumer = TwitterStreamConsumer.getConsumer(); consumer.start();
-	 * wpc = new WorkerPoolCreater(); wpc.setStart(); wpc.start(); uws = new
-	 * UploadToWebSockets(); uws.setStart(); uws.start(); } }
-	 */
-
 	public void run() {
 		if (!hasStarted) {
 			hasStarted = true;
@@ -45,7 +35,8 @@ public class Driver extends Thread {
 			executor.execute(consumer);
 			executor.execute(wpc);
 			executor.execute(uws);
-			System.out.println("Started All the threads");
+			// System.out.println("Started All the threads");
+			Logger.getLogger(Driver.class.getName()).log(Level.INFO, "Started All the threads");
 		}
 	}
 
@@ -80,8 +71,6 @@ public class Driver extends Thread {
 			consumer.shutDown();
 			uws.shutDown();
 			IdleConnectionReaper.shutdown();
-			// SNSObject.getSnsClient().shutdown();
-			// SQSObject.getSQS().shutdown();
 		}
 
 	}
@@ -98,10 +87,10 @@ public class Driver extends Thread {
 			IdleConnectionReaper.shutdown();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			System.out.printf("WAS interrupted\n");
+			Logger.getLogger(Driver.class.getName()).log(Level.INFO, "Interrupted");
 		}
 		executor = null;
-		System.out.println("Stopped everything");
+		Logger.getLogger(Driver.class.getName()).log(Level.INFO, "Stopped Everything");
 	}
 
 }

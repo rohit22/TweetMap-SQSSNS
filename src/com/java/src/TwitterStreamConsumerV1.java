@@ -138,7 +138,6 @@ public class TwitterStreamConsumerV1 extends Thread {
 		service = new ServiceBuilder().provider(TwitterApi.class).apiKey("CJAXt2iFZRB7wAAJZwQX7Flsk")
 				.apiSecret("QLiRrx8Knx4AVB9ZrEEafmxplzRdQ97EgysEb9Ka7c1LhySOII").build();
 
-	
 		// Set your access token
 		accessToken = new Token("15960177-Rp90ddg8Rc8FBa99PHdXsUeFXeaMRKx8jNyg4QVJR",
 				"NkKS7bfa4x0vgC4wU4EHKrnVM8V7DzzWxjQ5wVS8HsvmL");
@@ -265,7 +264,7 @@ public class TwitterStreamConsumerV1 extends Thread {
 				String text = map.get("text").toString();
 				String id = map.get("id").toString();
 				String id_str = map.get("id_str").toString();
-				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add");
+				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add", null);
 
 				// System.out.println(obj.toJSONString());
 			}
