@@ -17,11 +17,11 @@ The technologies used by us in this project are
 - Constraint 1: We are mostly interested in tweets in english language.
 - Constraint 2: As our end goal is to map them on the world map, we restricted ourselves to tweets that have the location information.
 
-**Data Indexing:** We used Amazon CloudSearch to index and search the data. It is a scalable solution with http end points to upload a document as well as search the index. It also provides the functionality for geographical search, which we intend to leverage. We index data primarily on 5 fields, *id, text, lattitude, longitude, original tweet* (for any future processing). 
+**Data Indexing:** We used Amazon CloudSearch to index and search the data. It is a scalable solution with http end points to upload a document as well as search the index. It also provides the functionality for geographical search, which we intend to leverage. We index data primarily on 6 fields, *id, text, lattitude, longitude, original tweet, sentiment* (for any future processing). 
 
 **Application:** Our application is built using web sockets to minimize the client-server interaction and also to make our application dynamic, which gives us a chance to load tweets on the map realtime. We then deployed the application using tomcat server. 
 
-**Basic application flow:** As soon as the application is launched, we start displaying tweets real time on the map. Once the user enters a keyword, we will display only those tweets that have the keyword in them. Due to restrictions on streaming api, we are not able to dynamically modify the keywords to track. We are still working on bypassing this restriction so that we can give the user a real-time search capability over the entire streaming data rather than restric ourselves to a set of keywords.
+**Basic application flow:** As soon as the application is launched, we start the twitter streaming service and the tweets are pushed to SQS queue. A thread pool will be pooling the SQS queue and retrieves these tweets and for each tweet, a new thread is created which uses Alchemy API to get the sentiment of the tweet. This thread, before exiting, publishes this sentiment-indexed tweet to SNS. SNS then pushes this tweet to an end point, from where it is displayed on the world map using websockets. Once the user enters a keyword, we will display only those tweets that have the keyword in them. Due to restrictions on streaming api, we are not able to dynamically modify the keywords to track. We are still working on bypassing this restriction so that we can give the user a real-time search capability over the entire streaming data rather than restric ourselves to a set of keywords.
 
 **Code:** The files contain all the codes (including codes that are being used to experiment)
 
@@ -45,5 +45,5 @@ The technologies used by us in this project are
 
 - *pom.xml:* Contains all the dependencies of the project.
 
-This is a maven project and can directly imported as one using maven and eclipse. This is a dynamic web project in eclipse and the war file of it can be easily deployed to a tomcat instance.
+This is a maven project and can directly imported as one using maven and eclipse. The war file of it can be easily deployed to a tomcat instance.
 
