@@ -19,8 +19,8 @@ import org.xml.sax.SAXException;
 
 public class AlchemyAPI {
 
-	private static String _apiKey = "0da824ce491b87189b5ed8bc230e0c18d0a295b4";
-	private static String _requestUri = "https://gateway-a.watsonplatform.net/calls/";
+	private static String _apiKey = ""; // api key for alchemy api
+	private static String _requestUri = ""; //request uri for alchemy api
 
 	public static String getSentiment(String text) {
 		try {
@@ -159,8 +159,10 @@ public class AlchemyAPI {
 			XPath xpath = xPathfactory.newXPath();
 			XPathExpression expr = xpath.compile("//docSentiment/type");
 			NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-			String s = nl.item(0).getTextContent();
-			return s;
+			if (nl != null && nl.getLength() > 0) {
+				String s = nl.item(0).getTextContent();
+				return s;
+			}
 		} catch (XPathExpressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

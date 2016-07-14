@@ -52,7 +52,7 @@ public class AmazonSNSReceiver {
         SubscribeRequest subscribeReq = new SubscribeRequest()
             .withTopicArn(SNSObject.getTopicArn())
             .withProtocol("http")
-            .withEndpoint("http://cfb2f2f8.ngrok.io");
+            .withEndpoint("http://59cb631e.ngrok.io");
         service.subscribe(subscribeReq);
 
         for (;;) {

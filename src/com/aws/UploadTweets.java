@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.cloudsearchdomain.AmazonCloudSearchDomainClient;
 import com.amazonaws.services.cloudsearchdomain.model.Hit;
@@ -29,8 +30,8 @@ public class UploadTweets {
 	private static String END_POINT_SEARCH;
 
 	public UploadTweets() {
-		END_POINT_DOC = "http://doc-tweetmap-v2-n5hfrsedqpzu4crrdmpgmuu5ya.us-east-1.cloudsearch.amazonaws.com/";
-		END_POINT_SEARCH = "http://search-tweetmap-v2-n5hfrsedqpzu4crrdmpgmuu5ya.us-east-1.cloudsearch.amazonaws.com";
+		END_POINT_DOC = ""; //Upload end point of cloud search
+		END_POINT_SEARCH = ""; //Search end point of cloud search
 	}
 
 	private AmazonCloudSearchDomainClient getUploadDomain() throws Exception {
@@ -40,7 +41,7 @@ public class UploadTweets {
 		 * (/home/rohitb/.aws/credentials).
 		 */
 		if (uDomain == null) {
-			uDomain = new AmazonCloudSearchDomainClient(new ProfileCredentialsProvider("Arushi"));
+			uDomain = new AmazonCloudSearchDomainClient(new DefaultAWSCredentialsProviderChain());
 			uDomain.setEndpoint(END_POINT_DOC);
 		}
 		return uDomain;
@@ -53,8 +54,7 @@ public class UploadTweets {
 		 * (/home/rohitb/.aws/credentials).
 		 */
 		if (sDomain == null) {
-			//sDomain = new AmazonCloudSearchDomainClient(new DefaultAWSCredentialsProviderChain());
-			sDomain = new AmazonCloudSearchDomainClient(new ProfileCredentialsProvider("Arushi"));
+			sDomain = new AmazonCloudSearchDomainClient(new DefaultAWSCredentialsProviderChain());
 			sDomain.setEndpoint(END_POINT_SEARCH);
 		}
 		return sDomain;
@@ -140,6 +140,6 @@ public class UploadTweets {
 		// AmazonCloudSearchDomainClient domainClient = ut.getDomain(END_POINT);
 		// String fileToWrite = "Upload.json";
 		// ut.addDocumentFile(END_POINT,fileToWrite);
-		ut.search("twitter");
+		ut.search("elections");
 	}
 }

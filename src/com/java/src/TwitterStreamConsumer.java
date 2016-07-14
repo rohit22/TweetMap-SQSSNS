@@ -10,6 +10,8 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.scribe.builder.*;
 import org.scribe.builder.api.*;
@@ -19,7 +21,9 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.LatLng;
+import com.sa.AlchemyAPI;
 import com.utils.JsonObjectES;
+import com.utils.JsonObjectResult;
 import com.utils.JsonParseRecursive;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
@@ -34,11 +38,15 @@ public class TwitterStreamConsumer implements Runnable {
 	private static Token accessToken;
 	private static TwitterStreamConsumer consumer;
 	private volatile static boolean shouldClose;
+	private static JSONArray array;
+	private static boolean onlyIndex;
+	private static AmazonSQS sqs;
 
 	public static TwitterStreamConsumer getConsumer() {
 		if (consumer == null) {
 			consumer = new TwitterStreamConsumer();
 			shouldClose = false;
+			onlyIndex = false;
 		}
 		return consumer;
 	}
@@ -47,7 +55,8 @@ public class TwitterStreamConsumer implements Runnable {
 			+ "budget, linkedin, facebook, yahoo, emoticon, like, mark, share, stock, market, education, obama,"
 			+ "bush, clinton, startup, economy, lol, fun, smile, happy, man, women, election, cricket, asia, US,"
 			+ "google, goog, china, bjp, budget, irani, smriti, years, arsenal, football, messi, nytimes, ny, winter,"
-			+ "snow, temperature, house, animals, zoo, park, donald, obama, health, modi, rahul, donald, brussels";
+			+ "snow, temperature, house, animals, zoo, park, donald, obama, health, modi, rahul, donald, brussels, hbo, game, of, thrones,"
+			+ "nehru, silicon, valley, shade, India, watch";
 
 	private GeoApiContext getContext() {
 		if (context == null) {
@@ -141,20 +150,26 @@ public class TwitterStreamConsumer implements Runnable {
 		request = null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void run() {
 		try {
 
 			OAuthRequest request = getRequest();
 
-			AmazonSQS sqs = SQSObject.getSQS();
-
+			if (!onlyIndex) {
+				sqs = SQSObject.getSQS();
+			}
 			request.addBodyParameter("track", queryWordsDefault); // Set
 			service.signRequest(accessToken, request);
 			Response response = request.send();
 
 			// Create a reader to read Twitter's stream
 			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getStream()));
+			int chunk = 0;
+			if (onlyIndex) {
+				array = new JSONArray();
 
+			}
 			String line;
 			while (((line = reader.readLine()) != null) && (request != null)) {
 				if (shouldClose) {
@@ -165,12 +180,31 @@ public class TwitterStreamConsumer implements Runnable {
 				}
 				JSONObject obj = parseTweet(line);
 				if (obj != null) {
-					Logger.getLogger(TwitterStreamConsumer.class.getName()).log(Level.INFO, "Published to SQS Queue -> " + obj,
-							"connection");
-					
+
 					// UploadToWebSockets.pushToSocket(obj);
-					sqs.sendMessage(new SendMessageRequest(SQSObject.getQueueURL(), obj.toJSONString()));
-					
+					if (onlyIndex) {
+						if (obj != null) {
+							JSONObject objFields = (JSONObject) obj.get("fields");
+							String text = (String) objFields.get("text");
+							String sentiment = AlchemyAPI.getSentiment(text);
+							System.out.println(text + "<->" + sentiment);
+							objFields.put("sentiment", sentiment);
+							obj.put("fields", objFields);
+							array.add(obj);
+							if (array.size() == 250) {
+								System.out.println("Writing to ES -> " + chunk);
+								UploadToWebSockets.writeToFileAndUpload(array, chunk);
+								array = new JSONArray();
+								chunk++;
+							}
+						}
+					} else {
+						Logger.getLogger(TwitterStreamConsumer.class.getName()).log(Level.INFO,
+								"Published to SQS Queue -> " + obj, "connection");
+
+						sqs.sendMessage(new SendMessageRequest(SQSObject.getQueueURL(), obj.toJSONString()));
+					}
+
 				}
 
 			}
@@ -219,12 +253,26 @@ public class TwitterStreamConsumer implements Runnable {
 				String text = map.get("text").toString();
 				String id = map.get("id").toString();
 				String id_str = map.get("id_str").toString();
-				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add",null);
+				obj = JsonObjectES.getObject(id, id_str, text, lat.toString(), lng.toString(), line, "add", null);
 
 				// System.out.println(obj.toJSONString());
 			}
 		}
 		// System.out.println(JsonParseRecursive.getMap(line).get("coordinates"));
 		return obj;
+	}
+
+	public boolean isOnlyIndex() {
+		return onlyIndex;
+	}
+
+	public void setOnlyIndex(boolean onlyIndex) {
+		TwitterStreamConsumer.onlyIndex = onlyIndex;
+	}
+
+	public static void main(String[] args) {
+		TwitterStreamConsumer consumer = getConsumer();
+		consumer.setOnlyIndex(true);
+		consumer.run();
 	}
 }

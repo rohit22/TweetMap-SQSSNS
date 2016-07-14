@@ -56,7 +56,7 @@ public class UploadToWebSockets implements Runnable {
 
 		// Subscribe to topic
 		subscribeReq = new SubscribeRequest().withTopicArn(SNSObject.getTopicArn()).withProtocol("http")
-				.withEndpoint("http://168e3d32.ngrok.io");
+				.withEndpoint("http://19718a8b.ngrok.io");
 		SNSObject.getSnsClient().subscribe(subscribeReq);
 
 	}
@@ -97,7 +97,7 @@ public class UploadToWebSockets implements Runnable {
 		sessionQueryWords.put(s, q);
 	}
 
-	private static void writeToFileAndUpload(JSONArray array, int chunk) {
+	public static void writeToFileAndUpload(JSONArray array, int chunk) {
 		// System.out.println("Writing the file" + chunk);
 		FileWriter fw;
 		try {
@@ -105,6 +105,9 @@ public class UploadToWebSockets implements Runnable {
 			fw.write(array.toJSONString());
 			fw.flush();
 			fw.close();
+			if (ut == null){
+				ut = new UploadTweets();
+			}
 			ut.addDocumentFile(String.valueOf(chunk) + ".json");
 			Logger.getLogger(UploadToWebSockets.class.getName()).log(Level.INFO,
 					"Uploaded File " + String.valueOf(chunk) + ".json", "upload");

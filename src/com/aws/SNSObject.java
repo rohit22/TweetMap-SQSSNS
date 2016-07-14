@@ -7,7 +7,7 @@ import com.amazonaws.services.sns.AmazonSNSClient;
 
 public class SNSObject {
 
-	private static String topicArn = "arn:aws:sns:us-east-1:571059497776:TweetMap";
+	private static String topicArn ; // topic ARN for SNS
 
 	private static AmazonSNSClient snsClient;
 	
